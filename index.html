@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer Evaluate | Semantic Answer Assessment Engine</title>
+    <meta name="description" content="Advanced semantic assessment engine for evaluating answers with AI-powered concept extraction and scoring">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-background">
+        <div class="bg-gradient-sphere sphere-1"></div>
+        <div class="bg-gradient-sphere sphere-2"></div>
+        <div class="bg-gradient-sphere sphere-3"></div>
+        <div class="bg-grid-pattern"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo Section -->
+            <div class="nav-logo-section">
+                <div class="logo-symbol">⚛</div>
+                <div class="logo-text">
+                    <h1>Answer Evaluate</h1>
+                    <p class="logo-tagline">Semantic Assessment Engine</p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="switchSection('evaluate')">
+                    <span>📝</span> Evaluate
+                </button>
+                <button class="nav-btn" onclick="switchSection('how-it-works')">
+                    <span>🎯</span> How It Works
+                </button>
+                <button class="nav-btn" onclick="switchSection('about')">
+                    <span>ℹ️</span> About
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+
+        <!-- SECTION 1: EVALUATE -->
+        <section id="evaluate-section" class="section active">
+            <div class="section-content">
+                <h2 class="section-title">Semantic Answer Evaluation</h2>
+                <p class="section-subtitle">Advanced concept extraction and multi-dimensional scoring</p>
+
+                <div class="content-grid">
+                    <!-- Left: Input Form -->
+                    <div class="card glass-card form-card">
+                        <h3 class="card-title">📝 Assessment Input</h3>
+                        
+                        <form id="eval-form" class="form">
+                            <div class="form-group">
+                                <label for="question">Question *</label>
+                                <textarea 
+                                    id="question"
+                                    placeholder="Enter the exam question here..."
+                                    rows="3"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reference-answer">Reference Answer (Optional)</label>
+                                <textarea 
+                                    id="reference-answer"
+                                    placeholder="Ideal/expected answer for better evaluation..."
+                                    rows="3"
+                                ></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-answer">Student Answer *</label>
+                                <textarea 
+                                    id="student-answer"
+                                    placeholder="Enter the student's response here..."
+                                    rows="4"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-text">Evaluate Now</span>
+                                <div id="btn-spinner" class="spinner hidden"></div>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Right: Results -->
+                    <div class="results-section">
+                        <div id="empty-state" class="card glass-card empty-card">
+                            <div class="empty-icon">📊</div>
+                            <h3>No Evaluation Yet</h3>
+                            <p>Fill the form and click "Evaluate Now" to see results</p>
+                        </div>
+
+                        <div id="results-panel" class="hidden">
+                            <!-- Score Circle -->
+                            <div class="card glass-card score-card">
+                                <h3 class="card-title">Overall Score</h3>
+                                <div class="score-circle-container">
+                                    <svg class="score-circle" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" class="circle-bg"></circle>
+                                        <circle id="progress-circle" cx="60" cy="60" r="54" class="circle-progress"></circle>
+                                    </svg>
+                                    <div class="score-text">
+                                        <span id="score-display" class="score-value">0</span>
+                                        <span class="score-max">/10</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Metrics Grid -->
+                            <div class="card glass-card metrics-card">
+                                <h3 class="card-title">📊 Evaluation Metrics</h3>
+                                <div class="metrics-grid">
+                                    <div class="metric">
+                                        <span class="metric-label">Coverage</span>
+                                        <span id="coverage-value" class="metric-value">0%</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Concepts Found</span>
+                                        <span id="concepts-count" class="metric-value">0</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Missing</span>
+                                        <span id="missing-count" class="metric-value">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feedback -->
+                            <div class="card glass-card feedback-card">
+                                <h3 class="card-title">💭 Feedback</h3>
+                                <p id="feedback-text" class="feedback-text"></p>
+                            </div>
+
+                            <!-- Missing Concepts Alert -->
+                            <div id="missing-alert" class="card alert-card alert-warning hidden">
+                                <h4>⚠️ Missing Concepts</h4>
+                                <p id="missing-concepts-text"></p>
+                            </div>
+
+                            <!-- Concepts Breakdown -->
+                            <div class="card glass-card concepts-card">
+                                <h3 class="card-title">🎯 Concept Analysis</h3>
+                                <div id="concepts-list" class="concepts-list">
+                                    <!-- Filled by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary" onclick="resetEval()">
+                                    ↻ New Evaluation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: HOW IT WORKS -->
+        <section id="how-it-works-section" class="section hidden">
+            <div class="section-content">
+                <h2 class="section-title">How Answer Evaluate Works</h2>
+                <p class="section-subtitle">Multi-stage semantic assessment pipeline</p>
+
+                <!-- Steps -->
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Concept Extraction</h3>
+                        <p>Advanced NLP identifies key concepts: noun phrases, entities, technical terms, and n-grams from questions and answers.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>Coverage Analysis</h3>
+                        <p>Semantic similarity matching determines what percentage of expected concepts are present in the student's response.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>Multi-Dimension Scoring</h3>
+                        <p>Evaluates across four dimensions: accuracy (40%), completeness (30%), clarity (20%), and relevance (10%).</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h3>Feedback Generation</h3>
+                        <p>Produces human-readable explanations, identifies missing concepts, and provides constructive feedback.</p>
+                    </div>
+                </div>
+
+                <!-- Scoring Dimensions -->
+                <div class="card glass-card scoring-info">
+                    <h3 class="card-title">Scoring Dimensions</h3>
+                    <div class="dimension-list">
+                        <div class="dimension-item">
+                            <span class="dim-name">Accuracy (40%)</span>
+                            <p>Correctness and factual alignment of concepts</p>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dim-name">Completeness (30%)</span>
+                            <p>Coverage of essential concepts from the question</p>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dim-name">Clarity (20%)</span>
+                            <p>Coherence and expressiveness of the answer</p>
+                        </div>
+                        <div class="dimension-item">
+                            <span class="dim-name">Relevance (10%)</span>
+                            <p>How well concepts relate to the question</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Score Levels -->
+                <div class="card glass-card score-levels">
+                    <h3 class="card-title">Score Interpretation</h3>
+                    <div class="score-level-grid">
+                        <div class="level excellent">
+                            <span class="level-range">9-10</span>
+                            <span class="level-name">Excellent</span>
+                        </div>
+                        <div class="level good">
+                            <span class="level-range">7-8</span>
+                            <span class="level-name">Good</span>
+                        </div>
+                        <div class="level fair">
+                            <span class="level-range">5-6</span>
+                            <span class="level-name">Fair</span>
+                        </div>
+                        <div class="level poor">
+                            <span class="level-range">0-4</span>
+                            <span class="level-name">Poor</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: ABOUT -->
+        <section id="about-section" class="section hidden">
+            <div class="section-content">
+                <h2 class="section-title">About Answer Evaluate</h2>
+                <p class="section-subtitle">Advanced semantic assessment technology</p>
+
+                <div class="about-grid">
+                    <!-- Project Info -->
+                    <div class="card glass-card about-card">
+                        <h3>🚀 Project Overview</h3>
+                        <p>Answer Evaluate is a semantic answer assessment engine that uses advanced Natural Language Processing to evaluate educational responses with precision and fairness. It goes beyond simple keyword matching to understand conceptual completeness and semantic alignment.</p>
+                    </div>
+
+                    <!-- Key Features -->
+                    <div class="card glass-card about-card">
+                        <h3>✨ Key Features</h3>
+                        <ul class="feature-list">
+                            <li>🧠 Semantic concept extraction using NLTK</li>
+                            <li>📊 Multi-dimensional scoring system</li>
+                            <li>🎯 Concept-level feedback and analysis</li>
+                            <li>⚡ Real-time evaluation</li>
+                            <li>📈 Batch processing support</li>
+                            <li>🔍 Detailed missing concept detection</li>
+                        </ul>
+                    </div>
+
+                    <!-- Technology Stack -->
+                    <div class="card glass-card about-card">
+                        <h3>💻 Technology Stack</h3>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Python 3</span>
+                            <span class="tech-badge">Flask</span>
+                            <span class="tech-badge">NLTK</span>
+                            <span class="tech-badge">REST API</span>
+                            <span class="tech-badge">HTML5/CSS3</span>
+                            <span class="tech-badge">JavaScript</span>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="card glass-card about-card">
+                        <h3>📊 Evaluation Metrics</h3>
+                        <div class="stat-grid">
+                            <div class="stat-item">
+                                <span class="stat-number">4</span>
+                                <span class="stat-label">Scoring Dimensions</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">0-10</span>
+                                <span class="stat-label">Score Range</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">100%</span>
+                                <span class="stat-label">NLP Based</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Info -->
+                <div class="card glass-card about-footer">
+                    <p style="text-align: center; color: var(--text-muted); font-size: 0.9em;">
+                        Answer Evaluate v2.0 | Semantic Answer Assessment Engine<br>
+                        Built with advanced NLP and machine learning techniques
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>crafted by laxmipriya ❤</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
